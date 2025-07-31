@@ -291,8 +291,7 @@ class _ShowMapScreenState extends State<ShowMapScreen> {
                       padding: const EdgeInsets.only(bottom: 44.0),
                       child: Column(
                         children: [
-                          Text(
-                            _batteryLevel,
+                          Text(_batteryLevel,
                             style: const TextStyle(
                               fontSize: 16,
                               color: Colors.black87,

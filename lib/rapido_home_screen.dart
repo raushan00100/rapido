@@ -71,8 +71,23 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
 
       if (placemarks.isNotEmpty) {
         Placemark placemark = placemarks.first;
-        String formattedAddress =
-            "${placemark.street}, ${placemark.locality}, ${placemark.postalCode}, ${placemark.country}";
+        // Build clean address without plus code
+        List<String> addressParts = [];
+        if (placemark.street != null && !placemark.street!.contains('+')) {
+          addressParts.add(placemark.street!);
+        }
+        if (placemark.locality != null && placemark.locality!.isNotEmpty) {
+          addressParts.add(placemark.locality!);
+        }
+        if (placemark.administrativeArea != null &&
+            placemark.administrativeArea!.isNotEmpty) {
+          addressParts.add(placemark.administrativeArea!);
+        }
+        if (placemark.country != null && placemark.country!.isNotEmpty) {
+          addressParts.add(placemark.country!);
+        }
+
+        String formattedAddress = addressParts.join(', ');
 
         setState(() {
           _currentController.text = formattedAddress;
