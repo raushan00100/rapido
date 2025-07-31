@@ -31,7 +31,6 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
 
   Future<void> _getCurrentLocation() async {
     try {
-      // Check and request location permission
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         setState(() {
@@ -58,12 +57,10 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
         return;
       }
 
-      // Get current position
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      // Reverse geocode to get address
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
@@ -71,7 +68,6 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
 
       if (placemarks.isNotEmpty) {
         Placemark placemark = placemarks.first;
-        // Build clean address without plus code
         List<String> addressParts = [];
         if (placemark.street != null && !placemark.street!.contains('+')) {
           addressParts.add(placemark.street!);
@@ -155,12 +151,15 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.yellow,
+        backgroundColor: Colors.black,
         title: const Center(
-          child: Text("Rapido", style: TextStyle(color: Colors.black)),
+          child: Text(
+            "Rapido",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
       body: Padding(
@@ -169,11 +168,22 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
           children: [
             TextField(
               controller: _currentController,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: "Current location",
-                prefixIcon: const Icon(Icons.location_on, color: Colors.green),
+                labelStyle: const TextStyle(color: Colors.white70),
+                prefixIcon: const Icon(Icons.location_on, color: Colors.white),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(28.0),
+                  borderSide: const BorderSide(color: Colors.white),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(28.0),
+                  borderSide: const BorderSide(color: Colors.white),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(28.0),
+                  borderSide: const BorderSide(color: Colors.white, width: 2),
                 ),
               ),
               onTap: () {
@@ -184,11 +194,22 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
             const SizedBox(height: 12),
             TextField(
               controller: _dropController,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: "Drop location",
-                prefixIcon: const Icon(Icons.location_on, color: Colors.red),
+                labelStyle: const TextStyle(color: Colors.white70),
+                prefixIcon: const Icon(Icons.location_on, color: Colors.white),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(28.0),
+                  borderSide: const BorderSide(color: Colors.white),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(28.0),
+                  borderSide: const BorderSide(color: Colors.white),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(28.0),
+                  borderSide: const BorderSide(color: Colors.white, width: 2),
                 ),
               ),
               onSubmitted: (value) => goToMap(),
@@ -198,7 +219,10 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
               onChanged: searchLocation,
             ),
             const SizedBox(height: 12),
-            if (_isLoading) const CircularProgressIndicator(),
+            if (_isLoading)
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
             if (_searchResults.isNotEmpty)
               Expanded(
                 child: ListView.builder(
@@ -206,9 +230,15 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
                   itemBuilder: (context, index) {
                     final place = _searchResults[index];
                     return ListTile(
-                      leading: const Icon(Icons.pin_drop),
-                      title: Text(place.displayName?.text ?? ''),
-                      subtitle: Text(place.formattedAddress ?? ''),
+                      leading: const Icon(Icons.pin_drop, color: Colors.white),
+                      title: Text(
+                        place.displayName?.text ?? '',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      subtitle: Text(
+                        place.formattedAddress ?? '',
+                        style: const TextStyle(color: Colors.white70),
+                      ),
                       onTap: () => handlePlaceTap(place),
                     );
                   },

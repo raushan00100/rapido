@@ -181,10 +181,14 @@ class _ShowMapScreenState extends State<ShowMapScreen> {
     final isReady = startLatLng != null && endLatLng != null && _error == null;
 
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.black,
         title: const Center(
-          child: Text("Map View", style: TextStyle(color: Colors.white)),
+          child: Text(
+            "Map View",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
       body: Column(
@@ -194,11 +198,15 @@ class _ShowMapScreenState extends State<ShowMapScreen> {
                 ? Center(
               child: Text(
                 _error!,
-                style: const TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
             )
                 : !isReady
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
                 : GoogleMap(
               initialCameraPosition: CameraPosition(
                 target: startLatLng!,
@@ -215,113 +223,113 @@ class _ShowMapScreenState extends State<ShowMapScreen> {
               myLocationEnabled: false,
             ),
           ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.2),
+                  blurRadius: 8,
+                  spreadRadius: 2,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 8,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      _distanceInKm != null
-                          ? "Distance: ${_distanceInKm!.toStringAsFixed(2)} km"
-                          : "Calculating distance...",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    _distanceInKm != null
+                        ? "Distance: ${_distanceInKm!.toStringAsFixed(2)} km"
+                        : "Calculating distance...",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
-                  _rideOption(
-                    icon: Icons.motorcycle,
-                    title: "Bike",
-                    subTitle: "Quick Bike rides\n2 mins away • Drop 11:37 am",
-                    price: _fare != null
-                        ? "₹${_fare!.toStringAsFixed(2)}"
-                        : "₹143",
-                    isFastest: true,
-                  ),
-                  _rideOption(
-                    icon: Icons.auto_fix_high,
-                    title: "Auto",
-                    subTitle: "2 mins • Drop 11:41 am",
-                    price: _fare != null
-                        ? "₹${(_fare! * 1.2).toStringAsFixed(2)}"
-                        : "₹199",
-                  ),
-                  _rideOption(
-                    icon: Icons.local_taxi,
-                    title: "Cab Economy",
-                    subTitle: "2 mins • Drop 11:41 am",
-                    price: _fare != null
-                        ? "₹${(_fare! * 1.5).toStringAsFixed(2)}"
-                        : "₹343",
-                  ),
-                  _rideOption(
-                    icon: Icons.local_taxi,
-                    title: "Cab Premium",
-                    subTitle: "5 mins • Drop 11:44 am",
-                    price: _fare != null
-                        ? "₹${(_fare! * 1.8).toStringAsFixed(2)}"
-                        : "₹421",
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 44.0),
-                      child: Column(
-                        children: [
-                          Text(_batteryLevel,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black87,
-                            ),
+                ),
+                _rideOption(
+                  icon: Icons.motorcycle,
+                  title: "Bike",
+                  subTitle: "Quick Bike rides\n2 mins away • Drop 11:37 am",
+                  price: _fare != null
+                      ? "₹${_fare!.toStringAsFixed(2)}"
+                      : "₹143",
+                  isFastest: true,
+                ),
+                _rideOption(
+                  icon: Icons.auto_fix_high,
+                  title: "Auto",
+                  subTitle: "2 mins • Drop 11:41 am",
+                  price: _fare != null
+                      ? "₹${(_fare! * 1.2).toStringAsFixed(2)}"
+                      : "₹199",
+                ),
+                _rideOption(
+                  icon: Icons.local_taxi,
+                  title: "Cab Economy",
+                  subTitle: "2 mins • Drop 11:41 am",
+                  price: _fare != null
+                      ? "₹${(_fare! * 1.5).toStringAsFixed(2)}"
+                      : "₹343",
+                ),
+                _rideOption(
+                  icon: Icons.local_taxi,
+                  title: "Cab Premium",
+                  subTitle: "5 mins • Drop 11:44 am",
+                  price: _fare != null
+                      ? "₹${(_fare! * 1.8).toStringAsFixed(2)}"
+                      : "₹421",
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 44.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          _batteryLevel,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
                           ),
-                          const SizedBox(height: 10),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _getBatteryLevel,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.yellow[700],
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _getBatteryLevel,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Text(
-                                "Get Battery Level",
-                                style: TextStyle(fontSize: 16),
+                            ),
+                            child: const Text(
+                              "Get Battery Level",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
