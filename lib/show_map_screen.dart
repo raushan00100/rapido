@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -18,6 +19,49 @@ class ShowMapScreen extends StatefulWidget {
 }
 
 class _ShowMapScreenState extends State<ShowMapScreen> {
+  static const platform = MethodChannel("com.example.rapido/rapido");
+  String _batteryLevel = 'Unknown battery level.';
+
+  Future<void> _getBatteryLevel() async {
+    String batteryLevel;
+    try {
+      final int result = await platform.invokeMethod('getBatteryLevel');
+      batteryLevel = 'Battery level: $result%.';
+
+      // Show toast based on battery level
+      if (result < 15) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please charge your phone'),
+            duration: Duration(seconds: 3),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Booking successful'),
+            duration: Duration(seconds: 3),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } on PlatformException catch (e) {
+      batteryLevel = "Failed to get battery level: '${e.message}'.";
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(batteryLevel),
+          duration: const Duration(seconds: 3),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+    setState(() {
+      _batteryLevel = batteryLevel;
+    });
+  }
+
   GoogleMapController? mapController;
   Set<Marker> _markers = {};
   Set<Polyline> _polyline = {};
@@ -61,7 +105,7 @@ class _ShowMapScreenState extends State<ShowMapScreen> {
             endLatLng!.latitude,
             endLatLng!.longitude,
           ) /
-          1000;
+              1000;
 
       _fare = _distanceInKm! * 2;
 
@@ -148,28 +192,28 @@ class _ShowMapScreenState extends State<ShowMapScreen> {
           Expanded(
             child: _error != null
                 ? Center(
-                    child: Text(
-                      _error!,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  )
+              child: Text(
+                _error!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            )
                 : !isReady
                 ? const Center(child: CircularProgressIndicator())
                 : GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: startLatLng!,
-                      zoom: 10,
-                    ),
-                    onMapCreated: (controller) {
-                      mapController = controller;
-                      WidgetsBinding.instance.addPostFrameCallback(
-                        (_) => _fitCamera(),
-                      );
-                    },
-                    markers: _markers,
-                    polylines: _polyline,
-                    myLocationEnabled: false,
-                  ),
+              initialCameraPosition: CameraPosition(
+                target: startLatLng!,
+                zoom: 10,
+              ),
+              onMapCreated: (controller) {
+                mapController = controller;
+                WidgetsBinding.instance.addPostFrameCallback(
+                      (_) => _fitCamera(),
+                );
+              },
+              markers: _markers,
+              polylines: _polyline,
+              myLocationEnabled: false,
+            ),
           ),
           Positioned(
             bottom: 0,
@@ -194,7 +238,6 @@ class _ShowMapScreenState extends State<ShowMapScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Display distance above Bike option
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
@@ -241,45 +284,40 @@ class _ShowMapScreenState extends State<ShowMapScreen> {
                         ? "₹${(_fare! * 1.8).toStringAsFixed(2)}"
                         : "₹421",
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.money),
-                          label: const Text("Cash"),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.percent),
-                          label: const Text("Offers"),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 44.0),
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.yellow[700],
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        child: const Text(
-                          "Book Bike",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                      child: Column(
+                        children: [
+                          Text(
+                            _batteryLevel,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _getBatteryLevel,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.yellow[700],
+                                foregroundColor: Colors.black,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text(
+                                "Get Battery Level",
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:rapido/place_api_model.dart';
 import 'package:rapido/show_map_screen.dart';
-
 import 'map_api_services.dart';
 
 class RapidoHomeScreen extends StatefulWidget {
@@ -21,6 +22,76 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
 
   Place? selectedCurrent;
   Place? selectedDrop;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      // Check and request location permission
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() {
+          _currentController.text = "Location services are disabled";
+        });
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            _currentController.text = "Location permissions denied";
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _currentController.text = "Location permissions permanently denied";
+        });
+        return;
+      }
+
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // Reverse geocode to get address
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark placemark = placemarks.first;
+        String formattedAddress =
+            "${placemark.street}, ${placemark.locality}, ${placemark.postalCode}, ${placemark.country}";
+
+        setState(() {
+          _currentController.text = formattedAddress;
+          selectedCurrent = Place(
+            displayName: DisplayName(text: placemark.locality ?? 'Current Location'),
+            formattedAddress: formattedAddress,
+          );
+        });
+      } else {
+        setState(() {
+          _currentController.text = "Unable to fetch address";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _currentController.text = "Error fetching location: $e";
+      });
+    }
+  }
 
   void searchLocation(String query) async {
     if (query.isEmpty) return;
@@ -73,8 +144,8 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.yellow,
-        title: Center(
-          child: const Text("Rapido", style: TextStyle(color: Colors.black)),
+        title: const Center(
+          child: Text("Rapido", style: TextStyle(color: Colors.black)),
         ),
       ),
       body: Padding(
@@ -84,8 +155,8 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
             TextField(
               controller: _currentController,
               decoration: InputDecoration(
-                labelText: "current location",
-                prefixIcon: Icon(Icons.location_on, color: Colors.green),
+                labelText: "Current location",
+                prefixIcon: const Icon(Icons.location_on, color: Colors.green),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(28.0),
                 ),
@@ -96,26 +167,22 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
               onChanged: searchLocation,
             ),
             const SizedBox(height: 12),
-
             TextField(
               controller: _dropController,
               decoration: InputDecoration(
                 labelText: "Drop location",
-                prefixIcon: Icon(Icons.location_on, color: Colors.red),
+                prefixIcon: const Icon(Icons.location_on, color: Colors.red),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(28.0),
                 ),
               ),
-
               onSubmitted: (value) => goToMap(),
-
               onTap: () {
                 isSearchingCurrent = false;
               },
               onChanged: searchLocation,
             ),
             const SizedBox(height: 12),
-
             if (_isLoading) const CircularProgressIndicator(),
             if (_searchResults.isNotEmpty)
               Expanded(
@@ -136,5 +203,12 @@ class _RapidoHomeScreenState extends State<RapidoHomeScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _currentController.dispose();
+    _dropController.dispose();
+    super.dispose();
   }
 }
